@@ -1,4 +1,0 @@
-packetdpi_unit_tests 5 0.0241181
-packetdpi_analyze_smoke 3 0.0273427
-packetdpi_filter_smoke 3 0.0302587
----

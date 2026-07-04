@@ -1,0 +1,36 @@
+# CMake and compiler outputs
+/build/
+/out/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+
+# Binaries and debug symbols
+*.exe
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.obj
+*.o
+*.a
+*.lib
+*.tlog
+*.recipe
+
+# Generated demo outputs
+/demo/filtered.pcap
+/demo/analysis_report.txt
+/filtered*.pcap
+/demo_filtered*.pcap
+/demo_report.txt
+
+# Editor and OS noise
+.vs/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini

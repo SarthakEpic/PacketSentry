@@ -1,6 +1,0 @@
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/packet_analyzer.dir
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/packetdpi.dir
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/packetdpi_tests.dir
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/RUN_TESTS.dir
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/ALL_BUILD.dir
-D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/ZERO_CHECK.dir
