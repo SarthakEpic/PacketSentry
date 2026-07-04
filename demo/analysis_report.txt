@@ -1,0 +1,48 @@
+PacketDPI Capture Report
+========================
+
+Packets read:        77
+Packets parsed:      77
+Parse errors:        0
+IPv4 packets:        77
+TCP packets:         73
+UDP packets:         4
+Payload packets:     22
+Total bytes:         5738
+TLS SNI hits:        16
+HTTP Host hits:      2
+DNS query hits:      4
+
+Application distribution
+------------------------
+Unknown               16  20.8%
+HTTP                   2  2.6%
+HTTPS                 39  50.6%
+DNS                    4  5.2%
+Google                 1  1.3%
+Facebook               1  1.3%
+YouTube                1  1.3%
+Twitter/X              3  3.9%
+Instagram              1  1.3%
+Amazon                 1  1.3%
+Apple                  1  1.3%
+Telegram               1  1.3%
+TikTok                 1  1.3%
+Spotify                1  1.3%
+Zoom                   1  1.3%
+Discord                1  1.3%
+GitHub                 1  1.3%
+Cloudflare             1  1.3%
+
+Top domains
+-----------
+www.facebook.com                    2
+www.google.com                      2
+www.youtube.com                     2
+api.twitter.com                     1
+discord.com                         1
+example.com                         1
+github.com                          1
+httpbin.org                         1
+open.spotify.com                    1
+twitter.com                         1

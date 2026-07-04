@@ -1,0 +1,11 @@
+[BLOCKED_IPS]
+
+[BLOCKED_APPS]
+TikTok
+
+[BLOCKED_DOMAINS]
+www.google.com
+*.youtube.com
+
+[BLOCKED_PORTS]
+8080

@@ -1,0 +1,23 @@
+PacketDPI Capture Report
+========================
+
+Packets read:        77
+Packets parsed:      77
+Parse errors:        0
+IPv4 packets:        77
+TCP packets:         73
+UDP packets:         4
+Payload packets:     22
+Total bytes:         5738
+TLS SNI hits:        16
+HTTP Host hits:      2
+DNS query hits:      4
+
+Representative detected domains:
+- www.google.com
+- www.youtube.com
+- www.facebook.com
+- github.com
+- open.spotify.com
+- discord.com
+- example.com

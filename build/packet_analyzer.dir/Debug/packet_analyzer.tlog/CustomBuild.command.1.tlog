@@ -1,0 +1,10 @@
+^D:\PROJECTS\PACKETSENTRY\PACKETDPI-1.0\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Projects/PacketSentry/PacketDPI-1.0 -BD:/Projects/PacketSentry/PacketDPI-1.0/build --check-stamp-file D:/Projects/PacketSentry/PacketDPI-1.0/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

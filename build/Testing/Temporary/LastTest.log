@@ -1,0 +1,125 @@
+Start testing: Jul 04 23:44 India Standard Time
+----------------------------------------------------------
+1/3 Testing: packetdpi_unit_tests
+1/3 Test: packetdpi_unit_tests
+Command: "D:/Projects/PacketSentry/PacketDPI-1.0/build/Debug/packetdpi_tests.exe"
+Directory: D:/Projects/PacketSentry/PacketDPI-1.0/build
+"packetdpi_unit_tests" start time: Jul 04 23:44 India Standard Time
+Output:
+----------------------------------------------------------
+[RuleManager] Blocked domain: *.youtube.com
+[RuleManager] Blocked port: 443
+Opened PCAP file: D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap
+  Version: 2.4
+  Snaplen: 65535 bytes
+  Link type: 1 (Ethernet)
+packetdpi unit tests passed
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"packetdpi_unit_tests" end time: Jul 04 23:44 India Standard Time
+"packetdpi_unit_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/3 Testing: packetdpi_analyze_smoke
+2/3 Test: packetdpi_analyze_smoke
+Command: "D:/Projects/PacketSentry/PacketDPI-1.0/build/Debug/packetdpi.exe" "analyze" "D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap" "--max" "5"
+Directory: D:/Projects/PacketSentry/PacketDPI-1.0/build
+"packetdpi_analyze_smoke" start time: Jul 04 23:44 India Standard Time
+Output:
+----------------------------------------------------------
+Opened PCAP file: D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap
+  Version: 2.4
+  Snaplen: 65535 bytes
+  Link type: 1 (Ethernet)
+PacketDPI Capture Report
+========================
+
+Packets read:        5
+Packets parsed:      5
+Parse errors:        0
+IPv4 packets:        5
+TCP packets:         5
+UDP packets:         0
+Payload packets:     1
+Total bytes:         354
+TLS SNI hits:        1
+HTTP Host hits:      0
+DNS query hits:      0
+
+Application distribution
+------------------------
+Unknown                1  20.0%
+HTTPS                  3  60.0%
+Google                 1  20.0%
+
+Top domains
+-----------
+www.google.com                      1
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"packetdpi_analyze_smoke" end time: Jul 04 23:44 India Standard Time
+"packetdpi_analyze_smoke" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/3 Testing: packetdpi_filter_smoke
+3/3 Test: packetdpi_filter_smoke
+Command: "D:/Projects/PacketSentry/PacketDPI-1.0/build/Debug/packetdpi.exe" "filter" "D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap" "D:/Projects/PacketSentry/PacketDPI-1.0/build/filtered_smoke.pcap" "--block-domain" "www.google.com"
+Directory: D:/Projects/PacketSentry/PacketDPI-1.0/build
+"packetdpi_filter_smoke" start time: Jul 04 23:44 India Standard Time
+Output:
+----------------------------------------------------------
+[RuleManager] Blocked domain: www.google.com
+Opened PCAP file: D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap
+  Version: 2.4
+  Snaplen: 65535 bytes
+  Link type: 1 (Ethernet)
+PacketDPI Filter Report
+=======================
+
+Input:       D:/Projects/PacketSentry/PacketDPI-1.0/test_dpi.pcap
+Output:      D:/Projects/PacketSentry/PacketDPI-1.0/build/filtered_smoke.pcap
+Packets:     77
+Parsed:      77
+Forwarded:   75
+Dropped:     2
+Flows:       43
+
+Blocked reasons
+---------------
+www.google.com                  2
+
+Applications
+------------
+Unknown         16
+HTTP            2
+HTTPS           39
+DNS             4
+Google          1
+Facebook        1
+YouTube         1
+Twitter/X       3
+Instagram       1
+Amazon          1
+Apple           1
+Telegram        1
+TikTok          1
+Spotify         1
+Zoom            1
+Discord         1
+GitHub          1
+Cloudflare      1
+
+Filtered capture written to: D:/Projects/PacketSentry/PacketDPI-1.0/build/filtered_smoke.pcap
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"packetdpi_filter_smoke" end time: Jul 04 23:44 India Standard Time
+"packetdpi_filter_smoke" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 04 23:44 India Standard Time
