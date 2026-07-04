@@ -24,6 +24,7 @@ CTestTestfile.cmake
 # Generated demo outputs
 /demo/filtered.pcap
 /demo/analysis_report.txt
+/ui/packetdpi-dashboard-*.png
 /filtered*.pcap
 /demo_filtered*.pcap
 /demo_report.txt

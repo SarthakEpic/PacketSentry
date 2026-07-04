@@ -1,0 +1,88 @@
+{
+  "capture": {
+    "file": "test_dpi.pcap",
+    "mode": "offline PCAP analysis",
+    "generatedAt": "2026-07-05",
+    "ciStatus": "verified",
+    "version": "PacketDPI 1.0"
+  },
+  "summary": {
+    "packetsRead": 77,
+    "packetsParsed": 77,
+    "parseErrors": 0,
+    "ipv4Packets": 77,
+    "tcpPackets": 73,
+    "udpPackets": 4,
+    "payloadPackets": 22,
+    "totalBytes": 5738,
+    "tlsSniHits": 16,
+    "httpHostHits": 2,
+    "dnsQueryHits": 4,
+    "forwarded": 72,
+    "dropped": 5,
+    "flows": 43
+  },
+  "applications": [
+    { "name": "HTTPS", "count": 39, "color": "#7dd3fc" },
+    { "name": "Unknown", "count": 16, "color": "#94a3b8" },
+    { "name": "DNS", "count": 4, "color": "#38d9a9" },
+    { "name": "Twitter/X", "count": 3, "color": "#8ab4ff" },
+    { "name": "HTTP", "count": 2, "color": "#f4c35b" },
+    { "name": "Google", "count": 1, "color": "#36c5ad" },
+    { "name": "Facebook", "count": 1, "color": "#5a8dee" },
+    { "name": "YouTube", "count": 1, "color": "#ff6b6b" },
+    { "name": "Instagram", "count": 1, "color": "#e879f9" },
+    { "name": "Amazon", "count": 1, "color": "#f59e0b" },
+    { "name": "Apple", "count": 1, "color": "#d1d5db" },
+    { "name": "Telegram", "count": 1, "color": "#60a5fa" },
+    { "name": "TikTok", "count": 1, "color": "#fb7185" },
+    { "name": "Spotify", "count": 1, "color": "#22c55e" },
+    { "name": "Zoom", "count": 1, "color": "#3b82f6" },
+    { "name": "Discord", "count": 1, "color": "#818cf8" },
+    { "name": "GitHub", "count": 1, "color": "#cbd5e1" },
+    { "name": "Cloudflare", "count": 1, "color": "#f97316" }
+  ],
+  "domains": [
+    { "domain": "www.google.com", "app": "Google", "source": "TLS SNI", "packets": 2, "action": "Dropped", "rule": "exact domain" },
+    { "domain": "www.youtube.com", "app": "YouTube", "source": "TLS SNI", "packets": 2, "action": "Dropped", "rule": "*.youtube.com" },
+    { "domain": "www.facebook.com", "app": "Facebook", "source": "TLS SNI", "packets": 2, "action": "Forwarded", "rule": "none" },
+    { "domain": "api.twitter.com", "app": "Twitter/X", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "twitter.com", "app": "Twitter/X", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "t.co", "app": "Twitter/X", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "github.com", "app": "GitHub", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "discord.com", "app": "Discord", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "open.spotify.com", "app": "Spotify", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "example.com", "app": "HTTP", "source": "HTTP Host", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.tiktok.com", "app": "TikTok", "source": "TLS SNI", "packets": 1, "action": "Dropped", "rule": "app TikTok" },
+    { "domain": "cloudflare.com", "app": "Cloudflare", "source": "DNS query", "packets": 1, "action": "Forwarded", "rule": "none" }
+  ],
+  "rules": [
+    { "type": "App", "value": "TikTok", "matches": 1, "status": "active" },
+    { "type": "Domain", "value": "www.google.com", "matches": 2, "status": "active" },
+    { "type": "Wildcard", "value": "*.youtube.com", "matches": 2, "status": "active" },
+    { "type": "Port", "value": "8080", "matches": 0, "status": "active" }
+  ],
+  "timeline": [
+    { "label": "00:00", "https": 8, "dns": 0, "dropped": 1, "unknown": 2 },
+    { "label": "00:03", "https": 6, "dns": 1, "dropped": 0, "unknown": 3 },
+    { "label": "00:06", "https": 7, "dns": 0, "dropped": 2, "unknown": 2 },
+    { "label": "00:09", "https": 5, "dns": 1, "dropped": 0, "unknown": 3 },
+    { "label": "00:12", "https": 4, "dns": 1, "dropped": 1, "unknown": 2 },
+    { "label": "00:15", "https": 6, "dns": 0, "dropped": 0, "unknown": 2 },
+    { "label": "00:18", "https": 3, "dns": 1, "dropped": 1, "unknown": 2 }
+  ],
+  "commands": [
+    {
+      "label": "Analyze sample capture",
+      "command": ".\\build\\Debug\\packetdpi.exe analyze test_dpi.pcap"
+    },
+    {
+      "label": "Filter with demo rules",
+      "command": ".\\build\\Debug\\packetdpi.exe filter test_dpi.pcap demo\\filtered.pcap --rules demo\\rules.txt"
+    },
+    {
+      "label": "Benchmark parser",
+      "command": ".\\build\\Debug\\packetdpi.exe benchmark test_dpi.pcap --iterations 20"
+    }
+  ]
+}

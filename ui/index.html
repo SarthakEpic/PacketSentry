@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PacketDPI Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="PacketDPI navigation">
+        <a class="brand" href="#overview" aria-label="PacketDPI overview">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M16 3 27 8v8c0 7-4.5 11-11 13C9.5 27 5 23 5 16V8l11-5Z"></path>
+              <path d="M10 15h12M12 20h8M13 10h6"></path>
+            </svg>
+          </span>
+          <span>
+            <strong>PacketDPI</strong>
+            <small>1.0 dashboard</small>
+          </span>
+        </a>
+
+        <nav class="nav-list">
+          <a href="#overview" class="nav-link active" data-section="overview">
+            <span class="nav-icon" aria-hidden="true">01</span>
+            Overview
+          </a>
+          <a href="#applications" class="nav-link" data-section="applications">
+            <span class="nav-icon" aria-hidden="true">02</span>
+            Applications
+          </a>
+          <a href="#domains" class="nav-link" data-section="domains">
+            <span class="nav-icon" aria-hidden="true">03</span>
+            Domains
+          </a>
+          <a href="#rules" class="nav-link" data-section="rules">
+            <span class="nav-icon" aria-hidden="true">04</span>
+            Rules
+          </a>
+          <a href="#timeline" class="nav-link" data-section="timeline">
+            <span class="nav-icon" aria-hidden="true">05</span>
+            Timeline
+          </a>
+          <a href="#export" class="nav-link" data-section="export">
+            <span class="nav-icon" aria-hidden="true">06</span>
+            Export
+          </a>
+        </nav>
+
+        <div class="rail-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong>CI verified</strong>
+            <small>Windows and Linux</small>
+          </div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="command-bar">
+          <div>
+            <p class="eyeline">Offline capture review</p>
+            <h1>PacketDPI analysis console</h1>
+          </div>
+          <div class="capture-chip" id="captureChip">Loading capture</div>
+          <div class="command-actions">
+            <button class="button ghost" id="copyCliButton" type="button">Copy CLI</button>
+            <button class="button" id="exportJsonButton" type="button">Export JSON</button>
+          </div>
+        </header>
+
+        <section class="hero-grid" id="overview" aria-labelledby="overviewTitle">
+          <div class="overview-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyeline">Current snapshot</p>
+                <h2 id="overviewTitle">PCAP inspection summary</h2>
+              </div>
+              <span class="freshness">sample-data.json</span>
+            </div>
+            <div class="metric-grid" id="metricGrid"></div>
+          </div>
+
+          <aside class="inspector" aria-labelledby="inspectorTitle">
+            <div class="inspector-top">
+              <p class="eyeline">Selected evidence</p>
+              <h2 id="inspectorTitle">Domain inspector</h2>
+            </div>
+            <div id="inspectorBody" class="inspector-body"></div>
+          </aside>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel wide" id="applications" aria-labelledby="appsTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyeline">Classification</p>
+                <h2 id="appsTitle">Application distribution</h2>
+              </div>
+              <button class="text-button" id="clearAppFilter" type="button">Show all</button>
+            </div>
+            <div class="app-chart" id="appChart"></div>
+          </article>
+
+          <article class="panel" id="rules" aria-labelledby="rulesTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyeline">Policy result</p>
+                <h2 id="rulesTitle">Rule impact</h2>
+              </div>
+            </div>
+            <div class="drop-ring" id="dropRing" aria-label="Forwarded versus dropped packets"></div>
+            <div class="rule-list" id="ruleList"></div>
+          </article>
+
+          <article class="panel wide" id="domains" aria-labelledby="domainsTitle">
+            <div class="section-heading table-heading">
+              <div>
+                <p class="eyeline">Evidence table</p>
+                <h2 id="domainsTitle">Top detected domains</h2>
+              </div>
+              <label class="search-box">
+                <span>Search</span>
+                <input id="domainSearch" type="search" placeholder="domain, app, source">
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Domain</th>
+                    <th>App</th>
+                    <th>Evidence</th>
+                    <th>Packets</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="domainRows"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel" id="timeline" aria-labelledby="timelineTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyeline">Capture shape</p>
+                <h2 id="timelineTitle">Packet timeline</h2>
+              </div>
+            </div>
+            <div class="timeline" id="timelineChart"></div>
+            <div class="legend">
+              <span><i class="legend-https"></i>HTTPS</span>
+              <span><i class="legend-dns"></i>DNS</span>
+              <span><i class="legend-drop"></i>Dropped</span>
+              <span><i class="legend-unknown"></i>Unknown</span>
+            </div>
+          </article>
+
+          <article class="panel full" id="export" aria-labelledby="exportTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyeline">Reproduce the run</p>
+                <h2 id="exportTitle">CLI handoff</h2>
+              </div>
+            </div>
+            <div class="command-list" id="commandList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

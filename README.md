@@ -28,6 +28,12 @@ Benchmark parser/classifier throughput:
 .\build\Release\packetdpi.exe benchmark test_dpi.pcap --iterations 20
 ```
 
+Open the optional dashboard:
+
+```powershell
+start ui\index.html
+```
+
 ## What It Demonstrates
 
 - C++17 systems programming with CMake targets and CTest.
@@ -38,6 +44,7 @@ Benchmark parser/classifier throughput:
 - Unit tests and CLI smoke tests.
 - Windows and Linux CI through GitHub Actions.
 - Benchmark command for repeatable local throughput checks.
+- Optional static dashboard for portfolio demos and report review.
 - Responsible-use documentation for a security-sensitive project.
 
 ## Project Targets
@@ -47,6 +54,26 @@ Benchmark parser/classifier throughput:
 | `packetdpi` | Main portfolio CLI: `analyze`, `stats`, `filter`, `benchmark` |
 | `packet_analyzer` | Educational low-level packet dump tool |
 | `packetdpi_tests` | Dependency-free unit tests for protocol extraction, rules, app mapping, and sample PCAP parsing |
+
+## Optional Dashboard
+
+The UI in `ui/` is a static browser dashboard for presenting PacketDPI results. It is intentionally optional: the CLI remains the source of truth, while the UI makes the analysis easier to review visually.
+
+Panels included:
+
+- Overview metrics.
+- Application distribution.
+- Top domains evidence table.
+- Rule impact.
+- Packet timeline.
+- Right-side domain inspector.
+- CLI command handoff and JSON export.
+
+Open it directly:
+
+```powershell
+start ui\index.html
+```
 
 ## Example Output
 
