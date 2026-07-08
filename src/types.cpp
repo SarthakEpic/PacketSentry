@@ -64,6 +64,13 @@ AppType sniToAppType(const std::string& sni) {
     std::string lower_sni = sni;
     std::transform(lower_sni.begin(), lower_sni.end(), lower_sni.begin(),
                    [](unsigned char c) { return std::tolower(c); });
+
+    auto isDomainOrSubdomain = [](const std::string& host, const std::string& domain) {
+        return host == domain ||
+               (host.size() > domain.size() &&
+                host.compare(host.size() - domain.size(), domain.size(), domain) == 0 &&
+                host[host.size() - domain.size() - 1] == '.');
+    };
     
     // YouTube
     if (lower_sni.find("youtube") != std::string::npos ||
@@ -85,7 +92,7 @@ AppType sniToAppType(const std::string& sni) {
     // Facebook/Meta
     if (lower_sni.find("facebook") != std::string::npos ||
         lower_sni.find("fbcdn") != std::string::npos ||
-        lower_sni.find("fb.com") != std::string::npos ||
+        isDomainOrSubdomain(lower_sni, "fb.com") ||
         lower_sni.find("fbsbx") != std::string::npos ||
         lower_sni.find("meta.com") != std::string::npos) {
         return AppType::FACEBOOK;
@@ -99,15 +106,15 @@ AppType sniToAppType(const std::string& sni) {
     
     // WhatsApp (owned by Meta)
     if (lower_sni.find("whatsapp") != std::string::npos ||
-        lower_sni.find("wa.me") != std::string::npos) {
+        isDomainOrSubdomain(lower_sni, "wa.me")) {
         return AppType::WHATSAPP;
     }
     
     // Twitter/X
     if (lower_sni.find("twitter") != std::string::npos ||
         lower_sni.find("twimg") != std::string::npos ||
-        lower_sni.find("x.com") != std::string::npos ||
-        lower_sni.find("t.co") != std::string::npos) {
+        isDomainOrSubdomain(lower_sni, "x.com") ||
+        isDomainOrSubdomain(lower_sni, "t.co")) {
         return AppType::TWITTER;
     }
     
@@ -147,7 +154,7 @@ AppType sniToAppType(const std::string& sni) {
     
     // Telegram
     if (lower_sni.find("telegram") != std::string::npos ||
-        lower_sni.find("t.me") != std::string::npos) {
+        isDomainOrSubdomain(lower_sni, "t.me")) {
         return AppType::TELEGRAM;
     }
     

@@ -1,6 +1,10 @@
 # PacketDPI 1.0 - Offline Deep Packet Inspection Portfolio Project
 
+![CI](https://github.com/SarthakEpic/PacketSentry/actions/workflows/ci.yml/badge.svg)
+
 PacketDPI is a C++17 command-line tool for offline packet inspection, application classification, rule-based filtering, and PCAP reporting. It is built for portfolio review: a reviewer can build it, run one command, inspect a report, and see practical networking/security engineering instead of only reading code.
+
+![PacketDPI dashboard](docs/assets/packetdpi-dashboard.png)
 
 ## Quick Start
 
@@ -10,10 +14,10 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-Analyze a capture:
+Analyze a capture and export dashboard data:
 
 ```powershell
-.\build\Release\packetdpi.exe analyze test_dpi.pcap
+.\build\Release\packetdpi.exe analyze test_dpi.pcap --json ui\packetdpi-report.json
 ```
 
 Filter a capture:
@@ -34,6 +38,8 @@ Open the optional dashboard:
 start ui\index.html
 ```
 
+Then click **Load JSON** and select `ui\packetdpi-report.json` to review the real CLI output in the browser.
+
 ## What It Demonstrates
 
 - C++17 systems programming with CMake targets and CTest.
@@ -45,6 +51,7 @@ start ui\index.html
 - Windows and Linux CI through GitHub Actions.
 - Benchmark command for repeatable local throughput checks.
 - Optional static dashboard for portfolio demos and report review.
+- JSON export path from the CLI into the optional dashboard.
 - Responsible-use documentation for a security-sensitive project.
 
 ## Project Targets
@@ -74,6 +81,35 @@ Open it directly:
 ```powershell
 start ui\index.html
 ```
+
+Load live analysis data:
+
+```powershell
+.\build\Release\packetdpi.exe analyze test_dpi.pcap --json ui\packetdpi-report.json
+start ui\index.html
+```
+
+In the dashboard, choose **Load JSON** and open `ui\packetdpi-report.json`. The bundled `ui/sample-data.json` and embedded fallback snapshot keep the page useful even when a reviewer opens it without generating a fresh report first.
+
+## Portfolio Demo Checklist
+
+Use this short path when recording a demo or handing the project to a reviewer:
+
+```powershell
+cmake -S . -B build
+cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
+.\build\Release\packetdpi.exe analyze test_dpi.pcap --json ui\packetdpi-report.json
+.\build\Release\packetdpi.exe filter test_dpi.pcap demo\filtered.pcap --block-domain *.google.com --block-app netflix
+start ui\index.html
+```
+
+What the reviewer should see:
+
+- The CLI parses the bundled PCAP and reports packet, protocol, domain, and application evidence.
+- The JSON file feeds the optional UI without any backend server.
+- The filter command writes a deterministic output PCAP and explains drop reasons.
+- GitHub Actions rebuilds and tests the same core workflow on Windows and Linux.
 
 ## Example Output
 

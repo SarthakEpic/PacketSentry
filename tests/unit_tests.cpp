@@ -117,6 +117,9 @@ void testAppMapping() {
     assert(sniToAppType("www.youtube.com") == AppType::YOUTUBE);
     assert(sniToAppType("api.github.com") == AppType::GITHUB);
     assert(sniToAppType("mail.google.com") == AppType::GOOGLE);
+    assert(sniToAppType("www.netflix.com") == AppType::NETFLIX);
+    assert(sniToAppType("www.microsoft.com") == AppType::MICROSOFT);
+    assert(sniToAppType("api.x.com") == AppType::TWITTER);
 }
 
 void testSamplePcap() {

@@ -1,0 +1,83 @@
+{
+  "capture": {
+    "file": "test_dpi.pcap",
+    "mode": "offline PCAP analysis",
+    "generatedAt": "packetdpi analyze",
+    "ciStatus": "local export",
+    "version": "PacketDPI 1.0"
+  },
+  "summary": {
+    "packetsRead": 77,
+    "packetsParsed": 77,
+    "parseErrors": 0,
+    "ipv4Packets": 77,
+    "tcpPackets": 73,
+    "udpPackets": 4,
+    "payloadPackets": 22,
+    "totalBytes": 5738,
+    "tlsSniHits": 16,
+    "httpHostHits": 2,
+    "dnsQueryHits": 4,
+    "forwarded": 77,
+    "dropped": 0,
+    "flows": 19
+  },
+  "applications": [
+    { "name": "HTTPS", "count": 39, "color": "#7dd3fc" },
+    { "name": "Unknown", "count": 16, "color": "#94a3b8" },
+    { "name": "DNS", "count": 4, "color": "#38d9a9" },
+    { "name": "HTTP", "count": 2, "color": "#f4c35b" },
+    { "name": "Google", "count": 1, "color": "#36c5ad" },
+    { "name": "Facebook", "count": 1, "color": "#5a8dee" },
+    { "name": "YouTube", "count": 1, "color": "#ff6b6b" },
+    { "name": "Twitter/X", "count": 1, "color": "#8ab4ff" },
+    { "name": "Instagram", "count": 1, "color": "#e879f9" },
+    { "name": "Netflix", "count": 1, "color": "#94a3b8" },
+    { "name": "Amazon", "count": 1, "color": "#f59e0b" },
+    { "name": "Microsoft", "count": 1, "color": "#94a3b8" },
+    { "name": "Apple", "count": 1, "color": "#d1d5db" },
+    { "name": "Telegram", "count": 1, "color": "#60a5fa" },
+    { "name": "TikTok", "count": 1, "color": "#fb7185" },
+    { "name": "Spotify", "count": 1, "color": "#22c55e" },
+    { "name": "Zoom", "count": 1, "color": "#3b82f6" },
+    { "name": "Discord", "count": 1, "color": "#818cf8" },
+    { "name": "GitHub", "count": 1, "color": "#cbd5e1" },
+    { "name": "Cloudflare", "count": 1, "color": "#f97316" }
+  ],
+  "domains": [
+    { "domain": "www.facebook.com", "app": "Facebook", "source": "TLS SNI", "packets": 2, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.google.com", "app": "Google", "source": "TLS SNI", "packets": 2, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.youtube.com", "app": "YouTube", "source": "TLS SNI", "packets": 2, "action": "Forwarded", "rule": "none" },
+    { "domain": "api.twitter.com", "app": "Twitter/X", "source": "DNS query", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "discord.com", "app": "Discord", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "example.com", "app": "HTTPS", "source": "HTTP Host", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "github.com", "app": "GitHub", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "httpbin.org", "app": "HTTPS", "source": "HTTP Host", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "open.spotify.com", "app": "Spotify", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "twitter.com", "app": "Twitter/X", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "web.telegram.org", "app": "Telegram", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.amazon.com", "app": "Amazon", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.apple.com", "app": "Apple", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.cloudflare.com", "app": "Cloudflare", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.instagram.com", "app": "Instagram", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.microsoft.com", "app": "Microsoft", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.netflix.com", "app": "Netflix", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "www.tiktok.com", "app": "TikTok", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" },
+    { "domain": "zoom.us", "app": "Zoom", "source": "TLS SNI", "packets": 1, "action": "Forwarded", "rule": "none" }
+  ],
+  "rules": [],
+  "timeline": [
+    { "label": "00:00", "https": 8, "dns": 1, "dropped": 0, "unknown": 2 },
+    { "label": "00:03", "https": 8, "dns": 1, "dropped": 0, "unknown": 2 },
+    { "label": "00:06", "https": 7, "dns": 1, "dropped": 0, "unknown": 3 },
+    { "label": "00:09", "https": 9, "dns": 0, "dropped": 0, "unknown": 2 },
+    { "label": "00:12", "https": 9, "dns": 0, "dropped": 0, "unknown": 2 },
+    { "label": "00:15", "https": 9, "dns": 0, "dropped": 0, "unknown": 2 },
+    { "label": "00:18", "https": 7, "dns": 1, "dropped": 0, "unknown": 3 }
+  ],
+  "commands": [
+    { "label": "Analyze capture", "command": "packetdpi analyze test_dpi.pcap" },
+    { "label": "Export dashboard JSON", "command": "packetdpi analyze test_dpi.pcap --json packetdpi-report.json" },
+    { "label": "Benchmark parser", "command": "packetdpi benchmark test_dpi.pcap --iterations 20" }
+  ]
+}

@@ -1,4 +1,4 @@
-const dashboardData = {
+let dashboardData = {
   capture: {
     file: "test_dpi.pcap",
     mode: "offline PCAP analysis",
@@ -26,13 +26,15 @@ const dashboardData = {
     { name: "HTTPS", count: 39, color: "#7dd3fc" },
     { name: "Unknown", count: 16, color: "#94a3b8" },
     { name: "DNS", count: 4, color: "#38d9a9" },
-    { name: "Twitter/X", count: 3, color: "#8ab4ff" },
+    { name: "Twitter/X", count: 1, color: "#8ab4ff" },
     { name: "HTTP", count: 2, color: "#f4c35b" },
     { name: "Google", count: 1, color: "#36c5ad" },
     { name: "Facebook", count: 1, color: "#5a8dee" },
     { name: "YouTube", count: 1, color: "#ff6b6b" },
     { name: "Instagram", count: 1, color: "#e879f9" },
+    { name: "Netflix", count: 1, color: "#ef4444" },
     { name: "Amazon", count: 1, color: "#f59e0b" },
+    { name: "Microsoft", count: 1, color: "#22d3ee" },
     { name: "Apple", count: 1, color: "#d1d5db" },
     { name: "Telegram", count: 1, color: "#60a5fa" },
     { name: "TikTok", count: 1, color: "#fb7185" },
@@ -46,8 +48,10 @@ const dashboardData = {
     { domain: "www.google.com", app: "Google", source: "TLS SNI", packets: 2, action: "Dropped", rule: "exact domain" },
     { domain: "www.youtube.com", app: "YouTube", source: "TLS SNI", packets: 2, action: "Dropped", rule: "*.youtube.com" },
     { domain: "www.facebook.com", app: "Facebook", source: "TLS SNI", packets: 2, action: "Forwarded", rule: "none" },
-    { domain: "api.twitter.com", app: "Twitter/X", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
+    { domain: "api.twitter.com", app: "Twitter/X", source: "DNS query", packets: 1, action: "Forwarded", rule: "none" },
     { domain: "twitter.com", app: "Twitter/X", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
+    { domain: "www.netflix.com", app: "Netflix", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
+    { domain: "www.microsoft.com", app: "Microsoft", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
     { domain: "t.co", app: "Twitter/X", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
     { domain: "github.com", app: "GitHub", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
     { domain: "discord.com", app: "Discord", source: "TLS SNI", packets: 1, action: "Forwarded", rule: "none" },
@@ -113,6 +117,44 @@ function showToast(message) {
   }, 1800);
 }
 
+function normalizeDashboardData(data) {
+  const fallback = dashboardData;
+  const normalized = {
+    capture: data.capture || fallback.capture,
+    summary: { ...fallback.summary, ...(data.summary || {}) },
+    applications: Array.isArray(data.applications) ? data.applications : [],
+    domains: Array.isArray(data.domains) ? data.domains : [],
+    rules: Array.isArray(data.rules) ? data.rules : [],
+    timeline: Array.isArray(data.timeline) ? data.timeline : [],
+    commands: Array.isArray(data.commands) ? data.commands : fallback.commands
+  };
+
+  normalized.applications = normalized.applications.map((app) => ({
+    name: app.name || "Unknown",
+    count: Number(app.count || 0),
+    color: app.color || "#94a3b8"
+  }));
+
+  normalized.domains = normalized.domains.map((domain) => ({
+    domain: domain.domain || "(unknown)",
+    app: domain.app || "Unknown",
+    source: domain.source || "unknown",
+    packets: Number(domain.packets || 0),
+    action: domain.action || "Forwarded",
+    rule: domain.rule || "none"
+  }));
+
+  normalized.timeline = normalized.timeline.map((bin) => ({
+    label: bin.label || "",
+    https: Number(bin.https || 0),
+    dns: Number(bin.dns || 0),
+    dropped: Number(bin.dropped || 0),
+    unknown: Number(bin.unknown || 0)
+  }));
+
+  return normalized;
+}
+
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -152,12 +194,12 @@ function renderMetrics() {
 
 function renderAppChart() {
   const total = dashboardData.applications.reduce((sum, app) => sum + app.count, 0);
-  const max = Math.max(...dashboardData.applications.map((app) => app.count));
+  const max = Math.max(1, ...dashboardData.applications.map((app) => app.count));
 
   qs("#appChart").innerHTML = dashboardData.applications
     .map((app) => {
       const width = Math.max(5, Math.round((app.count / max) * 100));
-      const pct = ((app.count / total) * 100).toFixed(1);
+      const pct = total ? ((app.count / total) * 100).toFixed(1) : "0.0";
       const selected = state.selectedApp === app.name ? "selected" : "";
       return `
         <button class="app-bar ${selected}" type="button" data-app="${app.name}">
@@ -170,6 +212,10 @@ function renderAppChart() {
       `;
     })
     .join("");
+
+  if (!dashboardData.applications.length) {
+    qs("#appChart").innerHTML = `<p class="note">No application data in the loaded JSON.</p>`;
+  }
 
   qsa(".app-bar").forEach((bar) => {
     bar.addEventListener("click", () => {
@@ -232,7 +278,11 @@ function renderDomains() {
 
 function renderInspector() {
   const item = state.selectedDomain;
-  const command = dashboardData.commands[1].command;
+  if (!item) {
+    qs("#inspectorBody").innerHTML = `<p class="note">No domain evidence is available in the current dashboard data.</p>`;
+    return;
+  }
+  const command = (dashboardData.commands[1] || dashboardData.commands[0] || { command: "packetdpi analyze <capture.pcap>" }).command;
   const ruleText = item.rule === "none" ? "No matching block rule" : item.rule;
   qs("#inspectorBody").innerHTML = `
     <h3>${item.domain}</h3>
@@ -286,9 +336,18 @@ function renderRules() {
       </div>
     `)
     .join("");
+
+  if (!dashboardData.rules.length) {
+    qs("#ruleList").innerHTML = `<p class="note">No filter rules were applied for this analysis export.</p>`;
+  }
 }
 
 function renderTimeline() {
+  if (!dashboardData.timeline.length) {
+    qs("#timelineChart").innerHTML = `<p class="note">No timeline data in the loaded JSON.</p>`;
+    return;
+  }
+
   const max = Math.max(
     ...dashboardData.timeline.map((bin) => bin.https + bin.dns + bin.dropped + bin.unknown)
   );
@@ -344,6 +403,9 @@ function renderCaptureChip() {
 }
 
 function renderAll() {
+  if (!dashboardData.domains.includes(state.selectedDomain)) {
+    state.selectedDomain = dashboardData.domains[0] || null;
+  }
   renderCaptureChip();
   renderMetrics();
   renderAppChart();
@@ -367,6 +429,29 @@ function bindInteractions() {
 
   qs("#copyCliButton").addEventListener("click", () => {
     copyText(dashboardData.commands.map((item) => item.command).join("\n"));
+  });
+
+  qs("#loadJsonButton").addEventListener("click", () => {
+    qs("#jsonFileInput").click();
+  });
+
+  qs("#jsonFileInput").addEventListener("change", async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      dashboardData = normalizeDashboardData(JSON.parse(text));
+      state.selectedDomain = dashboardData.domains[0] || null;
+      state.selectedApp = null;
+      state.search = "";
+      qs("#domainSearch").value = "";
+      renderAll();
+      showToast(`Loaded ${file.name}`);
+    } catch {
+      showToast("Could not load JSON");
+    } finally {
+      event.target.value = "";
+    }
   });
 
   qs("#exportJsonButton").addEventListener("click", () => {

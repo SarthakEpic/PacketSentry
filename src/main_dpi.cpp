@@ -27,6 +27,7 @@ struct CliOptions {
     std::string input_file;
     std::string output_file;
     std::string report_file;
+    std::string json_file;
     std::string rules_file;
     std::vector<std::string> block_ips;
     std::vector<std::string> block_apps;
@@ -37,6 +38,23 @@ struct CliOptions {
     int max_packets = -1;
     int iterations = 3;
     bool verbose = false;
+};
+
+struct DomainStat {
+    std::string domain;
+    AppType app = AppType::UNKNOWN;
+    std::string source;
+    uint64_t packets = 0;
+    std::string action = "Forwarded";
+    std::string rule = "none";
+};
+
+struct TimelineBin {
+    std::string label;
+    uint64_t https = 0;
+    uint64_t dns = 0;
+    uint64_t dropped = 0;
+    uint64_t unknown = 0;
 };
 
 struct CaptureSummary {
@@ -53,6 +71,8 @@ struct CaptureSummary {
     uint64_t dns_hits = 0;
     std::map<AppType, uint64_t> app_counts;
     std::map<std::string, uint64_t> domain_counts;
+    std::map<std::string, DomainStat> domains;
+    std::vector<TimelineBin> timeline;
 };
 
 struct FilterFlow {
@@ -137,11 +157,60 @@ bool parsePositiveInt(const std::string& value, int& out) {
     }
 }
 
+std::string jsonEscape(const std::string& value) {
+    std::ostringstream out;
+    for (char c : value) {
+        switch (c) {
+            case '"': out << "\\\""; break;
+            case '\\': out << "\\\\"; break;
+            case '\b': out << "\\b"; break;
+            case '\f': out << "\\f"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    out << "\\u"
+                        << std::hex << std::setw(4) << std::setfill('0')
+                        << static_cast<int>(static_cast<unsigned char>(c))
+                        << std::dec << std::setfill(' ');
+                } else {
+                    out << c;
+                }
+        }
+    }
+    return out.str();
+}
+
+std::string appColor(AppType app) {
+    switch (app) {
+        case AppType::HTTPS: return "#7dd3fc";
+        case AppType::UNKNOWN: return "#94a3b8";
+        case AppType::DNS: return "#38d9a9";
+        case AppType::TWITTER: return "#8ab4ff";
+        case AppType::HTTP: return "#f4c35b";
+        case AppType::GOOGLE: return "#36c5ad";
+        case AppType::FACEBOOK: return "#5a8dee";
+        case AppType::YOUTUBE: return "#ff6b6b";
+        case AppType::INSTAGRAM: return "#e879f9";
+        case AppType::AMAZON: return "#f59e0b";
+        case AppType::APPLE: return "#d1d5db";
+        case AppType::TELEGRAM: return "#60a5fa";
+        case AppType::TIKTOK: return "#fb7185";
+        case AppType::SPOTIFY: return "#22c55e";
+        case AppType::ZOOM: return "#3b82f6";
+        case AppType::DISCORD: return "#818cf8";
+        case AppType::GITHUB: return "#cbd5e1";
+        case AppType::CLOUDFLARE: return "#f97316";
+        default: return "#94a3b8";
+    }
+}
+
 void printUsage(const char* program) {
     std::cout << R"(PacketDPI 1.0 - offline packet inspection and filtering
 
 Usage:
-  )" << program << R"( analyze <input.pcap> [--max N] [--report file]
+  )" << program << R"( analyze <input.pcap> [--max N] [--report file] [--json file]
   )" << program << R"( stats <input.pcap>
   )" << program << R"( filter <input.pcap> <output.pcap> [rules/options]
   )" << program << R"( benchmark <input.pcap> [--iterations N]
@@ -154,10 +223,12 @@ Filter rules:
   --rules <file>           Load a rules file
 
 Other options:
+  --json <file>            Write dashboard-compatible JSON for analyze/stats
   --verbose                Print additional details
 
 Examples:
   )" << program << R"( analyze test_dpi.pcap --report demo/report.txt
+  )" << program << R"( analyze test_dpi.pcap --json ui/packetdpi-report.json
   )" << program << R"( filter test_dpi.pcap filtered.pcap --block-domain *.youtube.com
   )" << program << R"( benchmark test_dpi.pcap --iterations 10
 )";
@@ -219,6 +290,10 @@ bool parseArgs(int argc, char* argv[], CliOptions& options) {
             auto value = needValue(arg);
             if (!value) return false;
             options.report_file = *value;
+        } else if (arg == "--json") {
+            auto value = needValue(arg);
+            if (!value) return false;
+            options.json_file = *value;
         } else if (arg == "--max") {
             auto value = needValue(arg);
             if (!value || !parsePositiveInt(*value, options.max_packets)) return false;
@@ -267,9 +342,10 @@ size_t payloadOffset(const RawPacket& raw, const ParsedPacket& parsed) {
     return std::min(offset, raw.data.size());
 }
 
-void classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSummary& summary) {
+AppType classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSummary& summary) {
     AppType app = AppType::UNKNOWN;
     std::string domain;
+    std::string source;
 
     size_t offset = payloadOffset(raw, parsed);
     size_t payload_length = offset < raw.data.size() ? raw.data.size() - offset : 0;
@@ -284,6 +360,7 @@ void classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSum
         if (sni) {
             domain = *sni;
             app = sniToAppType(domain);
+            source = "TLS SNI";
             summary.sni_hits++;
         }
     }
@@ -293,6 +370,7 @@ void classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSum
         if (host) {
             domain = *host;
             app = sniToAppType(domain);
+            source = "HTTP Host";
             summary.http_host_hits++;
         }
     }
@@ -302,6 +380,7 @@ void classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSum
         if (query) {
             domain = *query;
             app = AppType::DNS;
+            source = "DNS query";
             summary.dns_hits++;
         }
     }
@@ -315,7 +394,29 @@ void classifyPacket(const RawPacket& raw, const ParsedPacket& parsed, CaptureSum
     summary.app_counts[app]++;
     if (!domain.empty()) {
         summary.domain_counts[domain]++;
+        auto& stat = summary.domains[domain];
+        stat.domain = domain;
+        AppType evidence_app = app;
+        if (source == "DNS query") {
+            AppType inferred_app = sniToAppType(domain);
+            if (inferred_app != AppType::UNKNOWN && inferred_app != AppType::HTTPS) {
+                evidence_app = inferred_app;
+            }
+        }
+        std::string detected_source = source.empty() ? "port fallback" : source;
+        bool should_replace_evidence =
+            stat.source.empty() ||
+            stat.source == "DNS query" ||
+            detected_source == "TLS SNI" ||
+            detected_source == "HTTP Host";
+        if (should_replace_evidence) {
+            stat.app = evidence_app;
+            stat.source = detected_source;
+        }
+        stat.packets++;
     }
+
+    return app;
 }
 
 bool summarizeCapture(const std::string& input_file, int max_packets, CaptureSummary& summary) {
@@ -323,6 +424,11 @@ bool summarizeCapture(const std::string& input_file, int max_packets, CaptureSum
     if (!reader.open(input_file)) {
         return false;
     }
+
+    summary.timeline = {
+        {"00:00"}, {"00:03"}, {"00:06"}, {"00:09"},
+        {"00:12"}, {"00:15"}, {"00:18"}
+    };
 
     RawPacket raw;
     ParsedPacket parsed;
@@ -336,7 +442,15 @@ bool summarizeCapture(const std::string& input_file, int max_packets, CaptureSum
             if (parsed.has_tcp) summary.tcp_packets++;
             if (parsed.has_udp) summary.udp_packets++;
             if (parsed.has_ip && (parsed.has_tcp || parsed.has_udp)) {
-                classifyPacket(raw, parsed, summary);
+                AppType app = classifyPacket(raw, parsed, summary);
+                size_t bin_index = summary.timeline.empty()
+                    ? 0
+                    : std::min<size_t>(summary.timeline.size() - 1, summary.parsed_packets % summary.timeline.size());
+                if (!summary.timeline.empty()) {
+                    if (app == AppType::DNS) summary.timeline[bin_index].dns++;
+                    else if (app == AppType::UNKNOWN) summary.timeline[bin_index].unknown++;
+                    else summary.timeline[bin_index].https++;
+                }
             }
         } else {
             summary.parse_errors++;
@@ -396,6 +510,96 @@ std::string renderSummary(const CaptureSummary& summary) {
     return out.str();
 }
 
+std::string renderDashboardJson(const CaptureSummary& summary, const std::string& input_file) {
+    std::ostringstream out;
+    out << "{\n";
+    out << "  \"capture\": {\n";
+    out << "    \"file\": \"" << jsonEscape(input_file) << "\",\n";
+    out << "    \"mode\": \"offline PCAP analysis\",\n";
+    out << "    \"generatedAt\": \"packetdpi analyze\",\n";
+    out << "    \"ciStatus\": \"local export\",\n";
+    out << "    \"version\": \"PacketDPI 1.0\"\n";
+    out << "  },\n";
+
+    out << "  \"summary\": {\n";
+    out << "    \"packetsRead\": " << summary.total_packets << ",\n";
+    out << "    \"packetsParsed\": " << summary.parsed_packets << ",\n";
+    out << "    \"parseErrors\": " << summary.parse_errors << ",\n";
+    out << "    \"ipv4Packets\": " << summary.ipv4_packets << ",\n";
+    out << "    \"tcpPackets\": " << summary.tcp_packets << ",\n";
+    out << "    \"udpPackets\": " << summary.udp_packets << ",\n";
+    out << "    \"payloadPackets\": " << summary.payload_packets << ",\n";
+    out << "    \"totalBytes\": " << summary.total_bytes << ",\n";
+    out << "    \"tlsSniHits\": " << summary.sni_hits << ",\n";
+    out << "    \"httpHostHits\": " << summary.http_host_hits << ",\n";
+    out << "    \"dnsQueryHits\": " << summary.dns_hits << ",\n";
+    out << "    \"forwarded\": " << summary.parsed_packets << ",\n";
+    out << "    \"dropped\": 0,\n";
+    out << "    \"flows\": " << summary.domains.size() << "\n";
+    out << "  },\n";
+
+    std::vector<std::pair<AppType, uint64_t>> apps(summary.app_counts.begin(), summary.app_counts.end());
+    std::sort(apps.begin(), apps.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+
+    out << "  \"applications\": [\n";
+    for (size_t i = 0; i < apps.size(); i++) {
+        const auto& [app, count] = apps[i];
+        out << "    { \"name\": \"" << jsonEscape(appTypeToString(app))
+            << "\", \"count\": " << count
+            << ", \"color\": \"" << appColor(app) << "\" }";
+        out << (i + 1 == apps.size() ? "\n" : ",\n");
+    }
+    out << "  ],\n";
+
+    std::vector<DomainStat> domains;
+    for (const auto& [_, stat] : summary.domains) {
+        domains.push_back(stat);
+    }
+    std::sort(domains.begin(), domains.end(), [](const auto& a, const auto& b) {
+        return a.packets > b.packets;
+    });
+
+    out << "  \"domains\": [\n";
+    for (size_t i = 0; i < domains.size(); i++) {
+        const auto& domain = domains[i];
+        out << "    { \"domain\": \"" << jsonEscape(domain.domain)
+            << "\", \"app\": \"" << jsonEscape(appTypeToString(domain.app))
+            << "\", \"source\": \"" << jsonEscape(domain.source)
+            << "\", \"packets\": " << domain.packets
+            << ", \"action\": \"" << jsonEscape(domain.action)
+            << "\", \"rule\": \"" << jsonEscape(domain.rule) << "\" }";
+        out << (i + 1 == domains.size() ? "\n" : ",\n");
+    }
+    out << "  ],\n";
+
+    out << "  \"rules\": [],\n";
+
+    out << "  \"timeline\": [\n";
+    for (size_t i = 0; i < summary.timeline.size(); i++) {
+        const auto& bin = summary.timeline[i];
+        out << "    { \"label\": \"" << jsonEscape(bin.label)
+            << "\", \"https\": " << bin.https
+            << ", \"dns\": " << bin.dns
+            << ", \"dropped\": " << bin.dropped
+            << ", \"unknown\": " << bin.unknown << " }";
+        out << (i + 1 == summary.timeline.size() ? "\n" : ",\n");
+    }
+    out << "  ],\n";
+
+    out << "  \"commands\": [\n";
+    out << "    { \"label\": \"Analyze capture\", \"command\": \"packetdpi analyze "
+        << jsonEscape(input_file) << "\" },\n";
+    out << "    { \"label\": \"Export dashboard JSON\", \"command\": \"packetdpi analyze "
+        << jsonEscape(input_file) << " --json packetdpi-report.json\" },\n";
+    out << "    { \"label\": \"Benchmark parser\", \"command\": \"packetdpi benchmark "
+        << jsonEscape(input_file) << " --iterations 20\" }\n";
+    out << "  ]\n";
+    out << "}\n";
+    return out.str();
+}
+
 int runAnalyze(const CliOptions& options) {
     CaptureSummary summary;
     if (!summarizeCapture(options.input_file, options.max_packets, summary)) {
@@ -413,6 +617,16 @@ int runAnalyze(const CliOptions& options) {
         }
         file << report;
         std::cout << "\nReport written to: " << options.report_file << "\n";
+    }
+
+    if (!options.json_file.empty()) {
+        std::ofstream file(options.json_file);
+        if (!file.is_open()) {
+            std::cerr << "Could not write JSON: " << options.json_file << "\n";
+            return 1;
+        }
+        file << renderDashboardJson(summary, options.input_file);
+        std::cout << "\nJSON written to: " << options.json_file << "\n";
     }
 
     return 0;
